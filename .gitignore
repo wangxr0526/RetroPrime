@@ -1,0 +1,5 @@
+./databox/
+*.egg-info
+.rar
+retroprime/*.zip
+retroprime/data_process/SmilesEnumerator/*.egg-info

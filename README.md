@@ -23,6 +23,9 @@ Then,
 cd retroprime/transformer_model/
 pip install -e .
 ```
+# Dataset
+USPTO-50K: https://github.com/connorcoley/retrosim/blob/master/retrosim/data/data_processed.csv
+USPTO 1976_sep2016:https://figshare.com/articles/dataset/Chemical_reactions_from_US_patents_1976-Sep2016_/5104873
 # Data Processing
 ```
 cd retroprime/dataprocess/

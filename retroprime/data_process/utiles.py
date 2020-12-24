@@ -1,3 +1,6 @@
+'''
+This script is changed from https://github.com/connorcoley/retrosim/blob/master/retrosim/utils/generate_retro_templates.py and added new features.
+'''
 import re
 from copy import deepcopy
 from itertools import permutations

@@ -95,7 +95,7 @@ def main(opt):
         top_resut_list = []
         for i in range(1, beam_size + 1):
             correct += (test_df['rank'] == i).sum()
-            print('C2C Top-{}: {:.1f}%'.format(i, 100 * correct / total))
+            print('P2S Top-{}: {:.1f}%'.format(i, 100 * correct / total))
             top_resut_list.append('{:.1f}%'.format(100 * correct / total))
         top_result_df['step_{}'.format(pre_file.split('.pt')[0].split('_')[-1])] = top_resut_list
         top_result_df.to_csv(save_top, index=False)

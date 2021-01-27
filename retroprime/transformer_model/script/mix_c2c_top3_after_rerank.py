@@ -124,6 +124,7 @@ def main(opt):
         for group in prediction_single:
             for line in group:
                 f.write(line + '\n')
+    print('done')
 
 
 if __name__ == '__main__':

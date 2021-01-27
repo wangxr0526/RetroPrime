@@ -3,10 +3,8 @@ from multiprocessing import Pool
 
 warnings.filterwarnings("ignore")
 import argparse
-import re
 import numpy as np
 import pandas as pd
-from rdkit import Chem
 from rdkit import RDLogger
 
 RDLogger.DisableLog('rdApp.*')

@@ -1,9 +1,17 @@
+import os
+import warnings
+from multiprocessing import Pool
+
+warnings.filterwarnings("ignore")
 import rdkit
 import argparse
 import re
 import numpy as np
 import pandas as pd
 from rdkit import Chem
+from rdkit import RDLogger
+
+RDLogger.DisableLog('rdApp.*')
 import sys
 from tqdm import tqdm
 from retroprime.data_process.utiles import Execute_grammar_err, get_info_index, c2apbp, split_smiles
@@ -33,7 +41,6 @@ def pre_list_to_group_list(predict_list, beam_size):
             predict_group_list.append(one_group_list)
             one_group_list = []
     return predict_group_list
-
 
 
 def mark_canonical_from_mark(canonical_smiles, mark_group):
@@ -184,6 +191,14 @@ def smi_tokenizer(smi, regex=False):
         return ' '.join(split_smiles(smi))
 
 
+def run_tasks(task):
+    i, canonical, preds = task
+    beam_size = opt.beam_size
+    one_marked_list = [execute_grammar_err(canonical, x) for x in preds]
+    one_marked_list_rerank = rerank_marked(one_marked_list, beam_size)
+    return i, one_marked_list_rerank
+
+
 def main(opt):
     src_file, tgt_file, pre_file, beam_size, have_class, save_rank_resut_file, save_top = opt.src_file, opt.tgt_file, opt.pre_file, opt.beam_size, bool(
         opt.have_class), opt.save_rank_results_file, opt.save_top
@@ -197,22 +212,14 @@ def main(opt):
     # 读取src作为prod canonical smiles参考
     canonical_list, class_mark_list = read_file(src_file, have_class=have_class, write_class=write_class)
 
-    # 读取tgt作为ground truth
-    if evaluation:
-        ground_true_list, _ = read_file(tgt_file, have_class=have_class)
-    else:
-        print('Using...')
-
     # 读取预测结果
     predict_list, _ = read_file(pre_file, have_class=have_class)
     predict_group_list = pre_list_to_group_list(predict_list, beam_size=beam_size)
+    print('Read Done!')
+    # 读取tgt作为ground truth
     if evaluation:
+        ground_true_list, _ = read_file(tgt_file, have_class=have_class)
         assert len(canonical_list) == len(ground_true_list) == len(predict_group_list)
-    else:
-        assert len(canonical_list) == len(predict_group_list)
-
-    total = len(predict_group_list)
-    if evaluation:
         if class_mark_list is not None:
             test_df = pd.DataFrame({'index': [i for i in range(len(ground_true_list))],
                                     'target': ground_true_list,
@@ -220,17 +227,27 @@ def main(opt):
         else:
             test_df = pd.DataFrame({'index': [i for i in range(len(ground_true_list))],
                                     'target': ground_true_list})
+
     else:
+        print('Using...')
+        assert len(canonical_list) == len(predict_group_list)
         test_df = pd.DataFrame({'index': [i for i in range(len(canonical_list))],
                                 'target': ['' for i in range(len(canonical_list))]})
+    pool = Pool(8)
+    total = len(predict_group_list)
+    tasks = list(zip([i for i in range(total)], canonical_list, predict_group_list))
+    # list_ = list(zip(canonical_list, predict_group_list))
+    # for i, (canonical, preds) in tqdm(enumerate(list_), total=len(list_)):
+    #     one_marked_list = [execute_grammar_err(canonical, x) for x in preds]
+    #     one_marked_list_rerank = rerank_marked(one_marked_list, beam_size)
+    #     for j in range(beam_size):
+    #         test_df.loc[i, 'marked_prediction_{}'.format(j + 1)] = one_marked_list_rerank[j]
+    all_results_list = []
+    for result in tqdm(pool.imap_unordered(run_tasks, tasks), total=len(tasks)):
+        all_results_list.append(result)
 
-    # rank_dic = {i:0 for i in range(len(predict_group_list))}
-    # marked_canoncial_list = []
-
-    list_ = list(zip(canonical_list, predict_group_list))
-    for i, (canonical, preds) in tqdm(enumerate(list_)):
-        one_marked_list = [execute_grammar_err(canonical, x) for x in preds]
-        one_marked_list_rerank = rerank_marked(one_marked_list, beam_size)
+    all_results_list.sort(key=lambda x: x[0])
+    for i, one_marked_list_rerank in tqdm(all_results_list):
         for j in range(beam_size):
             test_df.loc[i, 'marked_prediction_{}'.format(j + 1)] = one_marked_list_rerank[j]
 
@@ -283,6 +300,7 @@ def main(opt):
         with open(step2_save_file, 'w', encoding='utf-8') as f:
             for line in src_test:
                 f.write(line + '\n')
+
         if step2_save_top1_file is not '':
             with open(step2_save_top1_file, 'w', encoding='utf-8') as f:
                 for line in src_test[::top_num]:
@@ -295,11 +313,11 @@ if __name__ == '__main__':
         description='evaluate.py',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-beam_size', type=int, default=10, help='Beam size')
-    parser.add_argument('-src_file', type=str, default='../before2/without_class_all_position_data/src-test.txt')
-    parser.add_argument('-tgt_file', type=str, default='../before2/without_class_all_position_data/tgt-test.txt')
+    parser.add_argument('-src_file', type=str, default='')
+    parser.add_argument('-tgt_file', type=str, default='')
     parser.add_argument('-pre_file', type=str,
-                        default='../before2/without_class_all_position_data/predictions_USPTO-50K_model_step_90000.pt_on_USPTO-50K_beam10.txt')
-    parser.add_argument('-save_rank_results_file', type=str, default='c2c_count.csv')
+                        default='')
+    parser.add_argument('-save_rank_results_file', type=str, default='')
     parser.add_argument('-save_top', type=str, default='top_results.csv')
     # parser.add_argument('-evaluation', type=int, default=1, help='0 is False,1 is True')
     parser.add_argument('-evaluation', action='store_true')
@@ -308,9 +326,9 @@ if __name__ == '__main__':
     # parser.add_argument('-write_to_step2', type=int, default=1, help='0 is False,1 is True')
     parser.add_argument('-write_to_step2', action='store_true')
     # parser.add_argument('-write_class', type=int, default=1, help='0 is False,1 is True')
-    parser.add_argument('-write_class', action='stor_true')
+    parser.add_argument('-write_class', action='store_true')
     parser.add_argument('-step2_save_file', type=str,
-                        default='../before2/without_class_all_position_data/to_step2/src-test.txt')
+                        default=os.path.join('../data/USPTO-50K_S2R/', 'src-test_from_P2S.txt'))
     parser.add_argument('-step2_save_top1_file', type=str,
                         default='')
     opt = parser.parse_args()

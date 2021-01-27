@@ -197,11 +197,12 @@ def run_tasks(task):
 
 
 def main(opt):
-    src_file, tgt_file, pre_file, beam_size, have_class, save_rank_resut_file, save_top = opt.src_file, opt.tgt_file, opt.pre_file, opt.beam_size, bool(
-        opt.have_class), opt.save_rank_results_file, opt.save_top
-    write_to_step2 = bool(opt.write_to_step2)
-    write_class = bool(opt.write_class)
-    evaluation = bool(opt.evaluation)
+    src_file, tgt_file, pre_file, beam_size, have_class, save_rank_resut_file, save_top = \
+        opt.src_file, opt.tgt_file, opt.pre_file, opt.beam_size, bool(opt.have_class), \
+        opt.save_rank_results_file, opt.save_top
+    write_to_step2 = opt.write_to_step2
+    write_class = opt.write_class
+    evaluation = opt.evaluation
     step2_save_file = opt.step2_save_file
     step2_save_top1_file = opt.step2_save_top1_file
     print('have class?', have_class)

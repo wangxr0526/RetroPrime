@@ -1,9 +1,7 @@
-import os
 import warnings
 from multiprocessing import Pool
 
 warnings.filterwarnings("ignore")
-import rdkit
 import argparse
 import re
 import numpy as np
@@ -12,7 +10,6 @@ from rdkit import Chem
 from rdkit import RDLogger
 
 RDLogger.DisableLog('rdApp.*')
-import sys
 from tqdm import tqdm
 from retroprime.data_process.utiles import Execute_grammar_err, get_info_index, c2apbp, split_smiles
 from copy import deepcopy

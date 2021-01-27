@@ -1,7 +1,13 @@
+from multiprocessing import Pool
+
 import rdkit
 from rdkit import Chem
 import argparse
 from tqdm import tqdm
+from rdkit import RDLogger
+import numpy as np
+
+RDLogger.DisableLog('rdApp.*')
 
 
 def clear_map_canonical_smiles(smi):
@@ -59,24 +65,32 @@ def mix_top3(list1, list2, list3, rotation=True, rotation_top3=False):
     return new_list
 
 
+def run_tasks(task):
+    i, smi = task
+    return i, clear_map_canonical_smiles(smi)
+
+
 def main(opt):
     # 读取top3综合文件
     print('reading prediction...')
     with open(opt.pre_file, 'r', encoding='utf-8') as f:
         prediction = [''.join(x.strip().split(' ')) for x in f.readlines()]
+
     # 检查invalid并除去map标记转化为canonical_smiles
     print('clear map and convert invaild smiles to \'\'')
-    prediction_canonical = [clear_map_canonical_smiles(x) for x in tqdm(prediction)]
+    pool = Pool(opt.core)
+    tasks = [(i, x) for i, x in enumerate(prediction)]
+    all_results = []
+    for result in tqdm(pool.imap_unordered(run_tasks, tasks), total=len(tasks)):
+        all_results.append(result)
+    all_results.sort(key=lambda x: x[0])
+    prediction_canonical = [x[1] for x in all_results]
+
     # 按beam size分组
+    all_results_group_ = np.asanyarray(prediction_canonical).reshape(-1, opt.beam_size).tolist()
     all_results_group = []
-    beam_group = []
-    for pre in prediction_canonical:
-        beam_group.append(pre)
-        if len(beam_group) == opt.beam_size:
-            # 重新排序，将''换到最后
-            rerank_beam_group = rerank_group(beam_group, opt.beam_size)
-            all_results_group.append(rerank_beam_group)
-            beam_group = []
+    for beam_group in tqdm(all_results_group_):
+        all_results_group.append(rerank_group(beam_group, opt.beam_size))
 
     # 按照预测结果分组
     results_group_for_mix = []
@@ -118,10 +132,12 @@ if __name__ == '__main__':
         description='mix_c2c_top3_after_rerank.py',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-pre_file', type=str,
-                        default='../experiments/results/predictions_c2c90000-apbp2ab10000_on_USPTO-50K_beam20_top3.txt')
+                        default='')
     parser.add_argument('-mix_save_file', type=str,
-                        default='./test.txt')
+                        default='')
     parser.add_argument('-beam_size', type=int,
                         default=20)
+    parser.add_argument('-core', type=int,
+                        default=8)
     opt = parser.parse_args()
     main(opt)

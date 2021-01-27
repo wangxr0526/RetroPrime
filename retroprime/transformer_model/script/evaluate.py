@@ -328,7 +328,7 @@ if __name__ == '__main__':
     # parser.add_argument('-write_class', type=int, default=1, help='0 is False,1 is True')
     parser.add_argument('-write_class', action='store_true')
     parser.add_argument('-step2_save_file', type=str,
-                        default=os.path.join('../data/USPTO-50K_S2R/', 'src-test_from_P2S.txt'))
+                        default='')
     parser.add_argument('-step2_save_top1_file', type=str,
                         default='')
     opt = parser.parse_args()

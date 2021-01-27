@@ -1,11 +1,10 @@
+import argparse
 from multiprocessing import Pool
 
-import rdkit
-from rdkit import Chem
-import argparse
-from tqdm import tqdm
-from rdkit import RDLogger
 import numpy as np
+from rdkit import Chem
+from rdkit import RDLogger
+from tqdm import tqdm
 
 RDLogger.DisableLog('rdApp.*')
 

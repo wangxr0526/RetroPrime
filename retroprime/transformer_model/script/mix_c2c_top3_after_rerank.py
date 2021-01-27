@@ -70,12 +70,12 @@ def run_tasks(task):
 
 
 def main(opt):
-    # 读取top3综合文件
+
     print('reading prediction...')
     with open(opt.pre_file, 'r', encoding='utf-8') as f:
         prediction = [''.join(x.strip().split(' ')) for x in f.readlines()]
 
-    # 检查invalid并除去map标记转化为canonical_smiles
+
     print('clear map and convert invaild smiles to \'\'')
     pool = Pool(opt.core)
     tasks = [(i, x) for i, x in enumerate(prediction)]
@@ -85,13 +85,13 @@ def main(opt):
     all_results.sort(key=lambda x: x[0])
     prediction_canonical = [x[1] for x in all_results]
 
-    # 按beam size分组
+
     all_results_group_ = np.asanyarray(prediction_canonical).reshape(-1, opt.beam_size).tolist()
     all_results_group = []
     for beam_group in tqdm(all_results_group_):
         all_results_group.append(rerank_group(beam_group, opt.beam_size))
 
-    # 按照预测结果分组
+
     results_group_for_mix = []
     this_top_mix = []
     for beam_group in all_results_group:
@@ -107,7 +107,7 @@ def main(opt):
     print('{} group'.format(len(results_group_for_mix)))
     assert len(results_group_for_mix) == len(prediction_canonical) / (3 * opt.beam_size)
 
-    # 合成一份预测结果
+
     print('mixture results...')
     prediction_single = []
     for this_top_mix in results_group_for_mix:

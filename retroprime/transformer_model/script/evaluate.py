@@ -35,16 +35,6 @@ def pre_list_to_group_list(predict_list, beam_size):
     return predict_group_list
 
 
-def get_info_index(smiles):
-    info_index_list = []
-    mark = 0
-    mol = Chem.MolFromSmiles(smiles)
-    for atom in mol.GetAtoms():
-        if atom.HasProp('molAtomMapNumber'):
-            mark = atom.GetProp('molAtomMapNumber')
-            info_index_list.append(atom.GetIdx())
-    return list(set(info_index_list)), mark
-
 
 def mark_canonical_from_mark(canonical_smiles, mark_group):
     '''
@@ -311,10 +301,14 @@ if __name__ == '__main__':
                         default='../before2/without_class_all_position_data/predictions_USPTO-50K_model_step_90000.pt_on_USPTO-50K_beam10.txt')
     parser.add_argument('-save_rank_results_file', type=str, default='c2c_count.csv')
     parser.add_argument('-save_top', type=str, default='top_results.csv')
-    parser.add_argument('-evaluation', type=int, default=1, help='0 is False,1 is True')
-    parser.add_argument('-have_class', type=int, default=0, help='0 is False,1 is True')
-    parser.add_argument('-write_to_step2', type=int, default=1, help='0 is False,1 is True')
-    parser.add_argument('-write_class', type=int, default=1, help='0 is False,1 is True')
+    # parser.add_argument('-evaluation', type=int, default=1, help='0 is False,1 is True')
+    parser.add_argument('-evaluation', action='store_true')
+    # parser.add_argument('-have_class', type=int, default=0, help='0 is False,1 is True')
+    parser.add_argument('-have_class', action='store_true')
+    # parser.add_argument('-write_to_step2', type=int, default=1, help='0 is False,1 is True')
+    parser.add_argument('-write_to_step2', action='store_true')
+    # parser.add_argument('-write_class', type=int, default=1, help='0 is False,1 is True')
+    parser.add_argument('-write_class', action='stor_true')
     parser.add_argument('-step2_save_file', type=str,
                         default='../before2/without_class_all_position_data/to_step2/src-test.txt')
     parser.add_argument('-step2_save_top1_file', type=str,

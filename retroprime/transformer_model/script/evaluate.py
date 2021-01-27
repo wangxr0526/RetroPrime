@@ -6,10 +6,7 @@ import pandas as pd
 from rdkit import Chem
 import sys
 from tqdm import tqdm
-
-sys.path.append('./')
-import get_database as gd
-
+from retroprime.data_process.utiles import Execute_grammar_err, get_info_index, c2apbp, split_smiles
 from copy import deepcopy
 
 
@@ -73,9 +70,9 @@ def get_top(rank_list, top):
 
 
 def execute_grammar_err(canonical, pre):
-    if not gd.Execute_grammar_err(canonical, pre):
+    if not Execute_grammar_err(canonical, pre):
         if Chem.MolFromSmiles(pre) is not None:
-            mark_group = gd.get_info_index(pre)
+            mark_group = get_info_index(pre)
             marked_aug_smiles = mark_canonical_from_mark(canonical, mark_group)
             return marked_aug_smiles
         else:
@@ -96,9 +93,9 @@ def get_mark_apbp(canonical_pos_info_pd):
     mark = re.findall('\:([0-9]+)\]', canonical_pos_info_pd)[0]
     if mark == '1':
         split = True
-        test_mol = Chem.MolFromSmiles(gd.c2apbp(canonical_pos_info_pd))
+        test_mol = Chem.MolFromSmiles(c2apbp(canonical_pos_info_pd))
         if test_mol is None:
-            test_mol = Chem.MolFromSmarts(gd.c2apbp(canonical_pos_info_pd))
+            test_mol = Chem.MolFromSmarts(c2apbp(canonical_pos_info_pd))
         rxn_pos_index = []
         for atom in test_mol.GetAtoms():
             if atom.HasProp('molAtomMapNumber'):
@@ -116,7 +113,7 @@ def get_mark_apbp(canonical_pos_info_pd):
         return re.sub('\[\*\:([0-9]+)\]', '', smiles_apbp_info), split
     if mark == '4':
         split = True
-        test_mol = Chem.MolFromSmarts(gd.c2apbp(canonical_pos_info_pd))
+        test_mol = Chem.MolFromSmarts(c2apbp(canonical_pos_info_pd))
         rxn_pos_index = []
         for atom in test_mol.GetAtoms():
             if atom.HasProp('molAtomMapNumber'):
@@ -194,17 +191,18 @@ def smi_tokenizer(smi, regex=False):
         assert smi == ''.join(tokens)
         return ' '.join(tokens)
     else:
-        return ' '.join(gd.split_smiles(smi))
+        return ' '.join(split_smiles(smi))
 
 
 def main(opt):
-    src_file, tgt_file, pre_file, beam_size, have_class, save_rank_resut_file, save_top = opt.src_file, opt.tgt_file, opt.pre_file, opt.beam_size, bool(opt.have_class), opt.save_rank_results_file, opt.save_top
+    src_file, tgt_file, pre_file, beam_size, have_class, save_rank_resut_file, save_top = opt.src_file, opt.tgt_file, opt.pre_file, opt.beam_size, bool(
+        opt.have_class), opt.save_rank_results_file, opt.save_top
     write_to_step2 = bool(opt.write_to_step2)
     write_class = bool(opt.write_class)
     evaluation = bool(opt.evaluation)
     step2_save_file = opt.step2_save_file
     step2_save_top1_file = opt.step2_save_top1_file
-    print('have class?',have_class)
+    print('have class?', have_class)
     print('Reading files ...')
     # 读取src作为prod canonical smiles参考
     canonical_list, class_mark_list = read_file(src_file, have_class=have_class, write_class=write_class)
@@ -259,7 +257,7 @@ def main(opt):
             top_resut_list.append('{:.1f}%'.format(100 * correct / total))
         top_result_df['step_{}'.format(pre_file.split('.pt')[0].split('_')[-1])] = top_resut_list
         top_result_df.to_csv(save_top, index=False)
-        test_df.to_csv(save_rank_resut_file,index=False)
+        test_df.to_csv(save_rank_resut_file, index=False)
     else:
         test_df.to_csv(save_rank_resut_file, index=False)
     top_num = 3

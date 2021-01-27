@@ -1,7 +1,6 @@
-
 #!/usr/bin/env bash
 
-dataset=USPTO-50K # USPTO-50K for Self-Corrected Retrosynthetic Reaction Predictor
+dataset=USPTO-50K
 model=${dataset}_model_average.pt
 
 python translate.py -model experiments/models/${model} \

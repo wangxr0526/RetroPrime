@@ -1,4 +1,3 @@
-
 #!/usr/bin/env bash
 
 dataset=USPTO-full_pos_pred

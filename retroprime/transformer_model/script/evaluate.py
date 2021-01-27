@@ -205,7 +205,7 @@ def main(opt):
     evaluation = opt.evaluation
     step2_save_file = opt.step2_save_file
     step2_save_top1_file = opt.step2_save_top1_file
-    print('have class?', have_class)
+    print('have reaction type?', have_class)
     print('Reading files ...')
     # 读取src作为prod canonical smiles参考
     canonical_list, class_mark_list = read_file(src_file, have_class=have_class, write_class=write_class)
@@ -231,15 +231,9 @@ def main(opt):
         assert len(canonical_list) == len(predict_group_list)
         test_df = pd.DataFrame({'index': [i for i in range(len(canonical_list))],
                                 'target': ['' for i in range(len(canonical_list))]})
-    pool = Pool(8)
+    pool = Pool(opt.core)
     total = len(predict_group_list)
     tasks = list(zip([i for i in range(total)], canonical_list, predict_group_list))
-    # list_ = list(zip(canonical_list, predict_group_list))
-    # for i, (canonical, preds) in tqdm(enumerate(list_), total=len(list_)):
-    #     one_marked_list = [execute_grammar_err(canonical, x) for x in preds]
-    #     one_marked_list_rerank = rerank_marked(one_marked_list, beam_size)
-    #     for j in range(beam_size):
-    #         test_df.loc[i, 'marked_prediction_{}'.format(j + 1)] = one_marked_list_rerank[j]
     all_results_list = []
     for result in tqdm(pool.imap_unordered(run_tasks, tasks), total=len(tasks)):
         all_results_list.append(result)
@@ -322,5 +316,6 @@ if __name__ == '__main__':
     parser.add_argument('-write_class', action='store_true')
     parser.add_argument('-step2_save_file', type=str, default='')
     parser.add_argument('-step2_save_top1_file', type=str, default='')
+    parser.add_argument('-core', type=int, default=8)
     opt = parser.parse_args()
     main(opt)

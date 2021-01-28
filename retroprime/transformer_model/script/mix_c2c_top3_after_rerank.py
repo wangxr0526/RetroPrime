@@ -1,4 +1,5 @@
 import argparse
+import os
 from multiprocessing import Pool
 
 import numpy as np
@@ -132,7 +133,7 @@ if __name__ == '__main__':
         description='mix_c2c_top3_after_rerank.py',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-pre_file', type=str,
-                        default='')
+                        default=os.path.join('../experiments/results/USPTO-50K_S2R/predictions_USPTO-50K_S2R_model_step_100000.pt_beam10test_extract_5w_0.txt'))
     parser.add_argument('-mix_save_file', type=str,
                         default='')
     parser.add_argument('-beam_size', type=int,

@@ -115,30 +115,6 @@ def main(opt):
         else:
             print('Top-{}: {:.1f}%'.format(i, correct / total * 100))
 
-def get_iso_smiles(smiles):
-    iso = Chem.MolToSmiles(Chem.MolFromSmiles(smiles),isomericSmiles=True)
-    return iso
-def info_smarts2smiles(smiles):
-    smiles = ''.join(smiles.split(' '))
-    mol = Chem.MolFromSmiles(smiles)
-    if mol is not None:
-        for atom in mol.GetAtoms():
-            if atom.HasProp('molAtomMapNumber'):
-                atom.ClearProp('molAtomMapNumber')
-        canonical_smiles = Chem.MolToSmiles(mol,canonical=True)
-        return canonical_smiles
-    else:return 'err'
-def info_smarts_file2smiles_file(path):
-    save_path = path.replace('.txt','_smiles.txt')
-    with open(path,'r',encoding='utf-8') as f:
-        lines = f.readlines()
-    smiles_list = []
-    for line in tqdm(lines):
-        iso_smiles = info_smarts2smiles(line)
-        smiles_list.append(iso_smiles)
-    with open(save_path,'w',encoding='utf-8') as f:
-        for smiles in smiles_list:
-            f.write(smiles+'\n')
 
 
 

@@ -43,15 +43,15 @@ if __name__ == '__main__':
         write_csv(data, '{}/single/new_raw_{}.csv'.format(data_path,s))
     write_csv(all_data, '{}/databox/data/single/new_raw_all.csv')
 
-print('reading database...')
-all_data = []
-for i, s in enumerate(['train', 'val', 'test']):
-    print(s)
+    print('reading database...')
+    all_data = []
+    for i, s in enumerate(['train', 'val', 'test']):
+        print(s)
 
-    data = read_data('./data/single/raw_{}.csv'.format(s), s)
-    if i == 0:
-        all_data.extend(data)
-    else:
-        all_data.extend(data[1:])
-    write_csv(data, './data/single/new_raw_{}.csv'.format(s))
-write_csv(all_data, '../../databox/data/single/new_raw_all.csv')
+        data = read_data('./data/single/raw_{}.csv'.format(s), s)
+        if i == 0:
+            all_data.extend(data)
+        else:
+            all_data.extend(data[1:])
+        write_csv(data, './data/single/new_raw_{}.csv'.format(s))
+    write_csv(all_data, '../../databox/data/single/new_raw_all.csv')

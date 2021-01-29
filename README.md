@@ -8,7 +8,7 @@ conda install create -n retroprime_env python=3.6
 conda activate retroprime_env
 conda install -c conda-forge rdkit
 conda install pandas tqdm six
-conda install pytorch==1.5.0 torchvision torchaudio cudatoolkit=10.1 -c pytorch
+conda install pytorch==1.5.0 torchvision cudatoolkit=10.1 -c pytorch
 ```
 Then,
 ```

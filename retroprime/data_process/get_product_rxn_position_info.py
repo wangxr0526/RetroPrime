@@ -26,14 +26,18 @@ def run_task(task):
 
 
 if __name__ == '__main__':
-    pool = Pool(8)
+
     # Designated type of reaction
     opt = argparse.ArgumentParser()
-    opt.add_argument('-clean_data', default='../../databox/uspto_full/single/new_raw_all.csv')
-    opt.add_argument('-output_dir', default='../../databox/uspto_full/single/index_save/')
+    opt.add_argument('-clean_data', default='../../databox/select_50k/new_raw_all.csv')
+    opt.add_argument('-output_dir', default='../../databox/select_50k/cooked_data/')
+    opt.add_argument('-core', type=int, default=8)
     args, _ = opt.parse_known_args()
+    pool = Pool(args.core)
     database = pd.read_csv(args.clean_data)
     output_dir = args.output_dir
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
     rxn_smiles = database['reactants>reagents>production'].tolist()
 
     rxn_position_info_pd_list_index = []
@@ -55,8 +59,8 @@ if __name__ == '__main__':
     for index, marked_prod, canonical_smiles in rxn_position_info_pd_list_index:
         if marked_prod is None:
             drop_index.append(index)
-            prod_smiles.append(canonical_smiles)
         else:
+            prod_smiles.append(canonical_smiles)
             rxn_position_info_pd_list_end.append(marked_prod)
     # drop no atom changed reactions from raw datadf
     torch.save(rxn_position_info_pd_list_end, os.path.join(output_dir, '../rxn_position_info_pd_list_end'))
@@ -65,4 +69,4 @@ if __name__ == '__main__':
     new_database = database.drop(drop_index)
     assert len(new_database['reactants>reagents>production']) == len(prod_smiles)
     new_database['prod_smiles'] = prod_smiles
-    new_database.to_csv(os.path.join(output_dir, '../database_uspto_full_before_alignment.csv'), index=False)
+    new_database.to_csv(os.path.join(output_dir, '../database_all_before_alignment.csv'), index=False)

@@ -44,15 +44,15 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-use_data_path', default='../../databox/uspto_full/single/database_uspto_full.csv')
-    parser.add_argument('-output_dir', default='../transformer_model/data/USPTO-full_pos_pred/')
-    parser.add_argument('-uspto_full_pos_pred_aug_10_dic',
-                        default='../../databox/uspto_full/single/uspto_full_pos_pred_aug_10_dic')
+    parser.add_argument('-use_data_path', default='../../databox/select_50k/database_all.csv')
+    parser.add_argument('-output_dir', default='../transformer_model/data/select_50k_pos_pred/')
+    parser.add_argument('-pos_pred_aug_10_dic',
+                        default='../../databox/select_50k/get_aug_pos_pred/pos_pred_aug_10_dic')
 
     opt = parser.parse_args()
 
     database = pd.read_csv(opt.use_data_path)
-    uspto_full_pos_pred_aug_10_dic = torch.load(opt.uspto_full_pos_pred_aug_10_dic)
+    pos_pred_aug_10_dic = torch.load(opt.pos_pred_aug_10_dic)
     data_train = database.loc[database['dataset'] == 'train']
     data_test = database.loc[database['dataset'] == 'test']
     data_val = database.loc[database['dataset'] == 'val']
@@ -65,4 +65,4 @@ if __name__ == '__main__':
     if not os.path.exists(opt.output_dir):
         os.makedirs(opt.output_dir)
     for dataset in ['train', 'val', 'test']:
-        data2txt(uspto_full_pos_pred_aug_10_dic, set_index_dic, opt.output_dir, dataset)
+        data2txt(pos_pred_aug_10_dic, set_index_dic, opt.output_dir, dataset)

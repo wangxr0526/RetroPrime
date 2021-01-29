@@ -34,9 +34,9 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-output_dir', default='../transformer_model/data/USPTO-full_S2R/')
+    parser.add_argument('-output_dir', default='../transformer_model/data/select_50k_S2R/')
     parser.add_argument('-cooked_data_path',
-                        default='../../databox/uspto_full/single/s2r/')
+                        default='../../databox/select_50k/')
 
     opt = parser.parse_args()
     output_dir = opt.output_dir

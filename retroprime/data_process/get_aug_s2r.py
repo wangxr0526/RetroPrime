@@ -10,10 +10,10 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-use_data_path', default='../../databox/uspto_full/single/database_uspto_full.csv')
-    parser.add_argument('-output_dir', default='../../databox/uspto_full/single/s2r/')
+    parser.add_argument('-use_data_path', default='../../databox/select_50k/database_all.csv')
+    parser.add_argument('-output_dir', default='../../databox/select_50k/')
     parser.add_argument('-canonical_pd_info_list',
-                        default='../../databox/uspto_full/single/p2s/canonical_pd_info_list')
+                        default='../../databox/select_50k/canonical_pd_info_list')
 
     opt = parser.parse_args()
 
@@ -34,12 +34,12 @@ if __name__ == '__main__':
     canonical_pd_info_list = torch.load(opt.canonical_pd_info_list)
 
     apbp_dic = {}
-    for i, marked_prod in tqdm(enumerate(canonical_pd_info_list)):
+    for i, marked_prod in tqdm(enumerate(canonical_pd_info_list), total=len(canonical_pd_info_list)):
         apbp_dic[i] = get_mark_apbp(marked_prod)
     torch.save(apbp_dic, os.path.join(opt.output_dir, 'apbp_dic'))
 
     ab_dic = {}
-    for index, rxn in tqdm(enumerate(rxn_smiles[:10])):
+    for index, rxn in tqdm(enumerate(rxn_smiles), total=len(rxn_smiles)):
         ab_dic[index] = get_mark_ab(rxn)
 
     torch.save(ab_dic, os.path.join(opt.output_dir, 'ab_dic'))

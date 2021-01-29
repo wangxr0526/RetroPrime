@@ -10,11 +10,11 @@ from retroprime.data_process.utiles import transfor_mark
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-use_data_path',
-                        default='../../databox/uspto_full/single/database_uspto_full_before_alignment.csv')
+                        default='../../databox/select_50k/database_all_before_alignment.csv')
     parser.add_argument('-use_raw_marked_prod_path',
-                        default='../../databox/uspto_full/single/rxn_position_info_pd_list_end')
+                        default='../../databox/select_50k/rxn_position_info_pd_list_end')
     parser.add_argument('-output_dir',
-                        default='../../databox/uspto_full/single/')
+                        default='../../databox/select_50k/')
 
     opt = parser.parse_args()
     use_data_path = opt.use_data_path
@@ -38,4 +38,4 @@ if __name__ == '__main__':
             print('err:', err)
     torch.save(canonical_pd_info_list, os.path.join(opt.output_dir, 'canonical_pd_info_list'))
     new_database = database.drop(err_index_list)
-    new_database.to_csv(os.path.join(opt.output_dir, 'database_uspto_full.csv'))
+    new_database.to_csv(os.path.join(opt.output_dir, 'database_all.csv'))

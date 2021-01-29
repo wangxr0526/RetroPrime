@@ -7,9 +7,9 @@ import torch
 import re
 from tqdm import tqdm
 
-from SmilesEnumerator import SmilesEnumerator
+import SmilesEnumerator.SmilesEnumerator as se
 
-sme = SmilesEnumerator.SmilesEnumerator()
+sme = se.SmilesEnumerator()
 
 
 def clear_info(smiles):
@@ -24,9 +24,9 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-use_data_path', default='../../databox/uspto_full/single/database_uspto_full.csv')
-    parser.add_argument('-output_dir', default='../../databox/uspto_full/single/')
-    parser.add_argument('-canonical_pd_info_list', default='../../databox/uspto_full/single/canonical_pd_info_list')
+    parser.add_argument('-use_data_path', default='../../databox/select_50k/database_all.csv')
+    parser.add_argument('-output_dir', default='../../databox/select_50k/')
+    parser.add_argument('-canonical_pd_info_list', default='../../databox/select_50k/canonical_pd_info_list')
 
     opt = parser.parse_args()
     database = pd.read_csv(opt.use_data_path)
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     canonical_pd_info_dic = {i: j for i, j in enumerate(canonical_pd_info_list)}
     torch.save(canonical_pd_info_dic, os.path.join(opt.output_dir, 'canonical_pd_info_dic'))
 
-    uspto_full_pos_pred_aug_10_dic = {}
+    pos_pred_aug_10_dic = {}
     sorted_index = list(sorted(canonical_pd_info_dic.keys()))
     zip_data = list(zip(sorted_index, prod_smiles))
     for index, prod in tqdm(zip_data):
@@ -50,9 +50,9 @@ if __name__ == '__main__':
             aug_marked_can_prod = sme.randomize_smiles(marked_can_prod)
             aug_can_prod = clear_info(aug_marked_can_prod)
             this_10_pds.append((aug_can_prod, aug_marked_can_prod))
-        uspto_full_pos_pred_aug_10_dic[index] = this_10_pds
+        pos_pred_aug_10_dic[index] = this_10_pds
     print('done')
     p2s_aug_save_path = os.path.join(opt.output_dir, 'get_aug_pos_pred')
     if not os.path.exists(p2s_aug_save_path):
         os.makedirs(p2s_aug_save_path)
-    torch.save(uspto_full_pos_pred_aug_10_dic, os.path.join(p2s_aug_save_path, 'uspto_full_pos_pred_aug_10_dic'))
+    torch.save(pos_pred_aug_10_dic, os.path.join(p2s_aug_save_path, 'pos_pred_aug_10_dic'))

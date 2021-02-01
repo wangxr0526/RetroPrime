@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 
-dataset=USPTO-full_S2R
+dataset=select_50k_S2R
 python preprocess.py -train_src data/${dataset}/src-train.txt \
                      -train_tgt data/${dataset}/tgt-train.txt \
                      -valid_src data/${dataset}/src-val.txt \

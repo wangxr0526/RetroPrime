@@ -1,10 +1,28 @@
 import os
 from itertools import permutations
+from multiprocessing import Pool
 
 import pandas as pd
 from tqdm import tqdm
 import torch
 from retroprime.data_process.utiles import get_mark_ab, get_mark_apbp, editdistance, min_distance
+
+
+def run_tasks(task):
+    index, react, synth = task
+    corrent_react_list = react.split('.')
+    if len(corrent_react_list) == 1:
+        return index, react
+    elif len(corrent_react_list) > 1:
+        corrent_react_list.reverse()
+        react_reverse = '.'.join(corrent_react_list)
+        distance_react = editdistance(react, synth)
+        distance_react_reverse = editdistance(react_reverse, synth)
+        if distance_react <= distance_react_reverse:
+            return index, react
+        else:
+            return index, react_reverse
+
 
 if __name__ == '__main__':
     import argparse
@@ -43,20 +61,35 @@ if __name__ == '__main__':
         ab_dic[index] = get_mark_ab(rxn)
 
     torch.save(ab_dic, os.path.join(opt.output_dir, 'ab_dic'))
-    distance_min_ab_dic = {}
-    for i in tqdm(ab_dic.keys()):
-        this_ab_list = ab_dic[i].split('.')
-        if len(this_ab_list) == 1:
-            distance_min_ab_dic[i] = ab_dic[i]
-        elif len(this_ab_list) > 1:
-            this_ab_list.reverse()
-            ab_reverse = '.'.join(this_ab_list)
-            distance_ab = editdistance(ab_dic[i], apbp_dic[i][0])
-            distance_ab_reverse = editdistance(ab_reverse, apbp_dic[i][0])
-            if distance_ab <= distance_ab_reverse:
-                distance_min_ab_dic[i] = ab_dic[i]
-            else:
-                distance_min_ab_dic[i] = ab_reverse
+    # ab_dic = torch.load(os.path.join(opt.output_dir, 'ab_dic'))
+    # apbp_dic = torch.load(os.path.join(opt.output_dir, 'apbp_dic'))
+    react_items = list(sorted(ab_dic.items(), key=lambda x: x[0]))
+    synth_items = list(sorted(apbp_dic.items(), key=lambda x: x[0]))
+    tasks = []
+    for index, items in tqdm(enumerate(zip(react_items, synth_items)), total=len(react_items)):
+        (idxr, react), (idxs, synth) = items
+        assert idxr == idxs
+        tasks.append((index, react, synth))
+    pool = Pool(2)
+    min_distance_results = []
+    for result in tqdm(pool.imap_unordered(run_tasks, tasks), total=len(tasks)):
+        min_distance_results.append(result)
+    min_distance_results.sort(key=lambda x: x[0])
+    distance_min_ab_dic = {index: react for index, react in min_distance_results}
+    # distance_min_ab_dic = {}
+    # for i in tqdm(ab_dic.keys()):
+    #     this_ab_list = ab_dic[i].split('.')
+    #     if len(this_ab_list) == 1:
+    #         distance_min_ab_dic[i] = ab_dic[i]
+    #     elif len(this_ab_list) > 1:
+    #         this_ab_list.reverse()
+    #         ab_reverse = '.'.join(this_ab_list)
+    #         distance_ab = editdistance(ab_dic[i], apbp_dic[i][0])
+    #         distance_ab_reverse = editdistance(ab_reverse, apbp_dic[i][0])
+    #         if distance_ab <= distance_ab_reverse:
+    #             distance_min_ab_dic[i] = ab_dic[i]
+    #         else:
+    #             distance_min_ab_dic[i] = ab_reverse
     torch.save(distance_min_ab_dic, os.path.join(opt.output_dir, 'distance_min_ab_dic'))
 
     apbp_no_flag_dic = {i: apbp_dic[i][0] for i in range(len(apbp_dic))}
@@ -74,10 +107,13 @@ if __name__ == '__main__':
     torch.save(train_data_list, os.path.join(opt.output_dir, 'train_data_list'))
     torch.save(val_data_list, os.path.join(opt.output_dir, 'val_data_list'))
     torch.save(test_data_list, os.path.join(opt.output_dir, 'test_data_list'))
+    # train_data_list = torch.load(os.path.join(opt.output_dir, 'train_data_list'))
+    # val_data_list = torch.load(os.path.join(opt.output_dir, 'val_data_list'))
+    # test_data_list = torch.load(os.path.join(opt.output_dir, 'test_data_list'))
 
     # aug training data
     aug_train_data_list = []
-    for index, (synth, react) in tqdm(enumerate(train_data_list)):
+    for index, (synth, react) in tqdm(enumerate(train_data_list), total=len(train_data_list)):
         synth_split = synth.split('.')
         if len(synth_split) == 1:
             aug_train_data_list.append((index, synth, react))
@@ -90,4 +126,3 @@ if __name__ == '__main__':
             aug_train_data_list.append((index, synth, react))
 
     torch.save(aug_train_data_list, os.path.join(opt.output_dir, 'aug_train_data_list'))
-

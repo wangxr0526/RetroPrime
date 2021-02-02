@@ -118,8 +118,8 @@ fi
 transformer_root=retroprime/transformer_model
 model_save_path=${transformer_root}/experiments/checkpoints
 to_stage2_scritp_root=${transformer_root}/script
-model_P2S=${model_save_path}/USPTO-50K_pos_pred/USPTO-50K_pos_pred_model_step_90000.pt
-model_S2R=${model_save_path}/USPTO-50K_S2R/USPTO-50K_S2R_model_step_100000.pt
+model_P2S=${model_save_path}/USPTO-50K_pos_pred/USPTO-50K_pos_pred_model.pt
+model_S2R=${model_save_path}/USPTO-50K_S2R/USPTO-50K_S2R_model.pt
 
 python ${to_stage2_scritp_root}/smi_tokenizer.py -input $input_file \
                   -output ${output_dir}/canonical_token_for_input.txt

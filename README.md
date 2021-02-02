@@ -149,9 +149,18 @@ python ${to_stage2_scritp_root}/mix_c2c_top3_after_rerank.py \
                     -beam_size=${beam_size} -core ${core}
 ```
 
-You can prepare the input file (in TXT format) and specify the path of the trained two-stage model. Then:
+You can prepare the input file (in TXT format) and specify the path of the trained two-stage model.
 ```
-./run_example.sh INPUT_NAME OUTPUT_FOLDER BEAM_SIZE
+input file name: INPUT.txt
+
+...
+CCCCCC(=O)OCCCC
+c1ccccc1C(=O)OC
+...
+```
+Then:
+```
+./run_example.sh INPUT.txt OUTPUT_FOLDER BEAM_SIZE
 ```
 
 

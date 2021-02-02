@@ -95,7 +95,7 @@ python  train.py -data data/${dataset}/${dataset} \
                    -heads 8 -transformer_ff 2048                   
 ```
 
-#Use model for prediction
+# Use model for prediction
 We provide a template for reference```run_example.sh``` like this:
 ```
 #!/usr/bin/env bash

@@ -96,7 +96,7 @@ python  train.py -data data/${dataset}/${dataset} \
 ```
 
 # Use model for prediction
-We provide a template for reference```run_example.sh``` like this:
+We provide a template ```run_example.sh``` like this:
 ```
 #!/usr/bin/env bash
 

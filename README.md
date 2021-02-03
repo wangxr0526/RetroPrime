@@ -163,7 +163,7 @@ c1ccccc1C(=O)OC
 ```
 Then:
 ```
-./run_example.sh INPUT.txt OUTPUT_FOLDER BEAM_SIZE
+./run_example.sh INPUT.txt OUTPUT_FOLDER 10
 ```
 
 

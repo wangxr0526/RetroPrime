@@ -138,7 +138,7 @@ python ${to_stage2_scritp_root}/evaluate.py -beam_size ${beam_size}\
 		      -save_rank_results_file ${cache_dir}/pre_synthons_rank.csv \
 		      -save_top ${cache_dir}/pre_synthons_top_results.csv \
 		      -write_to_step2  \
-		      -core 8 \
+		      -core ${core} \
 		      -step2_save_file ${output_dir}/to_synthon_tokenlized.txt
 echo Synthons to Reactants
 CUDA_VISIBLE_DEVICES=${gpu} python ${transformer_root}/translate.py -gpu ${gpu} \

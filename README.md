@@ -96,6 +96,9 @@ python  train.py -data data/${dataset}/${dataset} \
 ```
 
 # Use model for prediction
+First, download the model file we trained https://drive.google.com/file/d/1-715B8jU0rRC3YaY4p6URQcgjcRG2OlV/view?usp=sharing  
+unzip it and put it under ```RetroPrime_root/retroprime/transformer_model/experiments/```
+ 
 We provide a template ```run_example.sh``` like this:
 ```
 #!/usr/bin/env bash

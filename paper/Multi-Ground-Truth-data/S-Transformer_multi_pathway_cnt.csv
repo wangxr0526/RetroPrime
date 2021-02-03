@@ -1,4 +1,4 @@
-products,is_all_correct,true_score
+products,Completely Match,Match score
 CC(C)(C)OC(=O)N1CCC(CO)CC1,True,3
 COc1cc2nccc(Oc3ccc(N)cc3)c2cc1OC,False,2
 COc1cc(Br)ccc1C(=O)O,True,2

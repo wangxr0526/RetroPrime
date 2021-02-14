@@ -113,9 +113,9 @@ if [ ! -e ${output_dir} ];
 then
     mkdir -p ${output_dir}
 fi
-if [ ! -e $cache_dir ];
+if [ ! -e ${cache_dir} ];
 then
-    mkdir -p $cache_dir
+    mkdir -p ${cache_dir}
 fi
 
 transformer_root=retroprime/transformer_model

@@ -165,7 +165,7 @@ Then:
 ```
 ./run_example.sh INPUT.txt OUTPUT_FOLDER 10
 ```
-Then prediction results are in ```OUTPUT_FOLDER/reactants_predicted_mix.txt```
+Then the predicted results are in ```OUTPUT_FOLDER/reactants_predicted_mix.txt```
 
 
 

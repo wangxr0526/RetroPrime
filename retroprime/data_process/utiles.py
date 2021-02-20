@@ -689,6 +689,7 @@ def get_mark_apbp(canonical_pos_info_pd):
         smiles_apbp_info1 = Chem.MolToSmiles(test_mol1, canonical=True)
         return smiles_apbp_info1, split
 
+
 def get_info_index(smiles):
     info_index_list = []
     mark = 0
@@ -698,6 +699,7 @@ def get_info_index(smiles):
             mark = atom.GetProp('molAtomMapNumber')
             info_index_list.append(atom.GetIdx())
     return list(set(info_index_list)), mark
+
 
 def get_mark_ab(rxn):
     rts = rxn.split('>>')[0]
@@ -787,24 +789,28 @@ def min_distance(src, tgt, mode='token'):
 
 
 def have_Cl(smarts_list):
-    for i in range(len(smarts_list)-1):
-        if smarts_list[i] is 'C' and smarts_list[i+1] is 'l':
+    for i in range(len(smarts_list) - 1):
+        if smarts_list[i] is 'C' and smarts_list[i + 1] is 'l':
             smarts_list[i] = 'Cl'
-            smarts_list[i+1] = ''
+            smarts_list[i + 1] = ''
+
 
 def have_Br(smarts_list):
-    for i in range(len(smarts_list)-1):
-        if smarts_list[i] is 'B' and smarts_list[i+1] is 'r':
+    for i in range(len(smarts_list) - 1):
+        if smarts_list[i] is 'B' and smarts_list[i + 1] is 'r':
             smarts_list[i] = 'Br'
-            smarts_list[i+1] = ''
+            smarts_list[i + 1] = ''
+
 
 def is_number(s):
     try:
         float(s)
         return True
-    except: return False
+    except:
+        return False
 
-def split_smarts(smarts,check_rdkit=False,all_bond=False,debug=False):
+
+def split_smarts(smarts, check_rdkit=False, all_bond=False, debug=False):
     '''
     拆分smarts但将方括号里面的看作一个原子进行分词，且将环的标记看作一个词
     :param smarts:
@@ -820,17 +826,18 @@ def split_smarts(smarts,check_rdkit=False,all_bond=False,debug=False):
         atoms = re.findall('\[.*?\]', smarts)
         others = re.findall('\].*?\[', smarts)
         for i in range(len(others)):
-            others[i] = others[i].replace(']','')
-            others[i] = others[i].replace('[','')
-        all_=[]
+            others[i] = others[i].replace(']', '')
+            others[i] = others[i].replace('[', '')
+        all_ = []
         for i in range(len(atoms)):
             all_.append(atoms[i])
             try:
                 if others[i] is not '':
                     all_.append(others[i])
-            except:continue
+            except:
+                continue
         if all_bond:
-            all_.append(smarts[smarts.rindex(']')+1:])
+            all_.append(smarts[smarts.rindex(']') + 1:])
         smarts_splited = []
         start_smarts = smarts[:smarts.index('[')]
         if start_smarts is not '':
@@ -843,11 +850,11 @@ def split_smarts(smarts,check_rdkit=False,all_bond=False,debug=False):
             if '[' not in all_[i]:
                 for j in range(len(all_[i])):
                     smarts_splited.append(all_[i][j])
-            else:smarts_splited.append(all_[i])
-
+            else:
+                smarts_splited.append(all_[i])
 
         if not all_bond:
-            end_smarts = smarts[smarts.rindex(']')+1:]
+            end_smarts = smarts[smarts.rindex(']') + 1:]
             if end_smarts is not '':
                 if is_number(end_smarts):
                     smarts_splited.append(end_smarts)
@@ -858,13 +865,13 @@ def split_smarts(smarts,check_rdkit=False,all_bond=False,debug=False):
         for i in range(len(smarts_splited)):
             if is_number(smarts_splited[i]):
                 number_list.append(i)
-        for i in range(len(number_list)-1):
+        for i in range(len(number_list) - 1):
 
-            if number_list[i]-number_list[i-1] == 1 :
-                smarts_splited[number_list[i-1]] = smarts_splited[number_list[i-1]]+smarts_splited[number_list[i]]
+            if number_list[i] - number_list[i - 1] == 1:
+                smarts_splited[number_list[i - 1]] = smarts_splited[number_list[i - 1]] + smarts_splited[number_list[i]]
                 smarts_splited[number_list[i]] = ''
-        if int(len(smarts_splited))in number_list and int(len(smarts_splited)-1) in number_list:
-            smarts_splited[-2] = smarts_splited[-2]+smarts_splited[-1]
+        if int(len(smarts_splited)) in number_list and int(len(smarts_splited) - 1) in number_list:
+            smarts_splited[-2] = smarts_splited[-2] + smarts_splited[-1]
             smarts_splited[-1] = ''
         smarts_splited_ = []
         have_Br(smarts_splited)
@@ -878,6 +885,7 @@ def split_smarts(smarts,check_rdkit=False,all_bond=False,debug=False):
             print(e)
         return print('err')
 
+
 def split_smiles(smiles):
     if '[' in smiles:
         return split_smarts(smiles)
@@ -890,6 +898,7 @@ def split_smiles(smiles):
             if s != '':
                 smiles_splited.append(s)
         return smiles_splited
+
 
 def MyGetAtom(smarts):
     '''
@@ -916,20 +925,23 @@ def MyGetAtom(smarts):
             atom_smarts_list.append(raw_list[i])
     return atom_smarts_list
 
+
 def get_info_num(atom_smarts):
-    num = re.findall('\:([0-9]+)',atom_smarts)
+    num = re.findall('\:([0-9]+)', atom_smarts)
     return num
 
-def atom_is_rough_same(atom1,atom2):
+
+def atom_is_rough_same(atom1, atom2):
     atom_mol1 = Chem.MolFromSmarts(atom1)
     atom_mol_list1 = [a for a in atom_mol1.GetAtoms()]
     atom1 = atom_mol_list1[0]
     atom_mol2 = Chem.MolFromSmarts(atom2)
     atom_mol_list2 = [a for a in atom_mol2.GetAtoms()]
     atom2 = atom_mol_list2[0]
-    if atom1.GetAtomicNum() != atom2.GetAtomicNum():return False
-    if atom1.GetIsAromatic() != atom2.GetIsAromatic():return False
+    if atom1.GetAtomicNum() != atom2.GetAtomicNum(): return False
+    if atom1.GetIsAromatic() != atom2.GetIsAromatic(): return False
     return True
+
 
 def Execute_grammar_err(canonical_smiles, pre_smiles):
     canonical_smiles = canonical_smiles
@@ -978,6 +990,7 @@ def Execute_grammar_err(canonical_smiles, pre_smiles):
     if len(MyGetAtom(canonical_smiles)) != len(MyGetAtom(top1_pre)):
         Execute = True
     return Execute
+
 
 def read_file(file, have_class, write_class=False):
     with open(file, 'r', encoding='utf-8') as f:

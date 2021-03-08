@@ -1,5 +1,5 @@
 # RetroPrime
-This is the code for the "RetroPrime: A Chemistry-Inspired and Transformer-based Method for Retro-synthesis Predictions" \
+This is the code for the "RetroPrime: A Diverse, Plausible and Transformer-based Method for Single-Step Retrosynthesis Predictions" \
 To implement our models we were based on OpenNMT-py (v0.4.1).
 # Install requirements
 Create a new conda environment:

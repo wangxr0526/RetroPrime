@@ -3,10 +3,11 @@
 from __future__ import print_function
 import argparse
 import codecs
+import csv
 import os
 import math
 from tqdm import tqdm
-
+import pandas as pd
 import torch
 
 from itertools import count
@@ -165,7 +166,8 @@ class Translator(object):
                   tgt_data_iter=None,
                   src_dir=None,
                   batch_size=None,
-                  attn_debug=False):
+                  attn_debug=False,
+                  attn_file=None):
         """
         Translate content of `src_data_iter` (if not None) or `src_path`
         and get gold scores if one of `tgt_data_iter` or `tgt_path` is set.
@@ -231,12 +233,12 @@ class Translator(object):
 
         all_scores = []
         all_predictions = []
-
+        attn_outputs = ''
         for batch in tqdm(data_iter):
             batch_data = self.translate_batch(batch, data, fast=self.fast)
             translations = builder.from_batch(batch_data)
 
-            for trans in translations:
+            for index__, trans in enumerate(translations):
                 all_scores += [trans.pred_scores[:self.n_best]]
                 pred_score_total += trans.pred_scores[0]
                 pred_words_total += len(trans.pred_sents[0])
@@ -265,25 +267,53 @@ class Translator(object):
 
                 # Debug attention.
                 if attn_debug:
-                    preds = trans.pred_sents[0]
-                    preds.append('</s>')
-                    attns = trans.attns[0].tolist()
-                    if self.data_type == 'text':
-                        srcs = trans.src_raw
-                    else:
-                        srcs = [str(item) for item in range(len(attns[0]))]
-                    header_format = "{:>10.10} " + "{:>10.7} " * len(srcs)
-                    row_format = "{:>10.10} " + "{:>10.7f} " * len(srcs)
-                    output = header_format.format("", *srcs) + '\n'
-                    for word, row in zip(preds, attns):
-                        max_index = row.index(max(row))
-                        row_format = row_format.replace(
-                            "{:>10.7f} ", "{:*>10.7f} ", max_index + 1)
-                        row_format = row_format.replace(
-                            "{:*>10.7f} ", "{:>10.7f} ", max_index)
-                        output += row_format.format(word, *row) + '\n'
-                        row_format = "{:>10.10} " + "{:>10.7f} " * len(srcs)
-                    os.write(1, output.encode('utf-8'))
+                    for topk__, (preds, attns_) in enumerate(
+                            zip(trans.pred_sents[:self.n_best], trans.attns[:self.n_best])):
+                        if attn_file is None:
+                            print('attn_file is None')
+                            break
+                        preds.append('</s>')
+
+                        attns = attns_.tolist()
+                        if self.data_type == 'text':
+                            srcs = trans.src_raw
+                        else:
+                            srcs = [str(item) for item in range(len(attns[0]))]
+
+                        if not os.path.exists(attn_file):
+                            os.makedirs(attn_file)
+                        with open(os.path.join(attn_file, '{}_{}.csv'.format(index__, topk__ + 1)), 'w') as csvfile:
+                            writer = csv.writer(csvfile)
+                            writer.writerow([''] + list(srcs))
+                            for word, row in zip(preds, attns):
+                                writer.writerow([word] + ['{:>10.7f}'.format(x_) for x_ in row])
+
+                    # for preds, attns_ in zip(trans.pred_sents, trans.attns):
+                    #     # preds = trans.pred_sents[0]
+                    #     preds.append('</s>')
+                    #     attns = attns_.tolist()
+                    #     if self.data_type == 'text':
+                    #         srcs = trans.src_raw
+                    #     else:
+                    #         srcs = [str(item) for item in range(len(attns[0]))]
+                    #     header_format = "{:>10.10} " + "{:>10.7} " * len(srcs)
+                    #     row_format = "{:>10.10} " + "{:>10.7f} " * len(srcs)
+                    #     output = header_format.format("", *srcs) + '\n'
+                    #
+                    #     for word, row in zip(preds, attns):
+                    #         max_index = row.index(max(row))
+                    #         row_format = row_format.replace(
+                    #             "{:>10.7f} ", "{:*>10.7f} ", max_index + 1)
+                    #         row_format = row_format.replace(
+                    #             "{:*>10.7f} ", "{:>10.7f} ", max_index)
+                    #         output += row_format.format(word, *row) + '\n'
+                    #         row_format = "{:>10.10} " + "{:>10.7f} " * len(srcs)
+                    #     attn_outputs += '{}<attn_split>\n'.format(output)
+                    #     os.write(1, output.encode('utf-8'))
+
+        # if attn_file is not None and attn_debug:
+        #     with open(attn_file, 'w', encoding='utf-8') as af:
+        #         af.write(attn_outputs)
 
         if self.report_score:
             msg = self._report_score('PRED', pred_score_total,
@@ -420,7 +450,6 @@ class Translator(object):
 
         if self.mask is not None:
             mask = self.mask.get_log_probs_masking_tensor(src.squeeze(2), beam_size).to(memory_bank.device)
-
 
         for step in range(max_length):
             decoder_input = alive_seq[:, -1].view(1, -1, 1)

@@ -1,6 +1,8 @@
 # RetroPrime
 This is the code for the "RetroPrime: A Diverse, Plausible and Transformer-based Method for Single-Step Retrosynthesis Predictions" \
-To implement our models we were based on OpenNMT-py (v0.4.1).
+To implement our models we were based on OpenNMT-py (v0.4.1). [Chemical Engineering Journal](https://www.sciencedirect.com/science/article/abs/pii/S1385894721014303 "Chemical Engineering Journal")
+## RetroPrime Pipline
+![Pipline](./paper/Pipline.png)
 # Install requirements
 Create a new conda environment:
 ```

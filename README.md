@@ -1,6 +1,6 @@
 # RetroPrime
 This is the code for the "RetroPrime: A Diverse, Plausible and Transformer-based Method for Single-Step Retrosynthesis Predictions"  [Chemical Engineering Journal](https://www.sciencedirect.com/science/article/abs/pii/S1385894721014303 "Chemical Engineering Journal").  
-Preprint [Chemrxiv](https://chemrxiv.org/articles/preprint/RetroPrime_A_Chemistry-Inspired_and_Transformer-based_Method_for_Retrosynthesis_Predictions/12971942,"Chemrxiv"). \
+Preprint [Chemrxiv](https://chemrxiv.org/articles/preprint/RetroPrime_A_Chemistry-Inspired_and_Transformer-based_Method_for_Retrosynthesis_Predictions/12971942 "Chemrxiv"). \
 To implement our models we were based on OpenNMT-py (v0.4.1). 
 ## RetroPrime Pipline
 ![Pipline](./paper/Pipline.png)
